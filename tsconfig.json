@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "esModuleInterop": true
+  }
+}

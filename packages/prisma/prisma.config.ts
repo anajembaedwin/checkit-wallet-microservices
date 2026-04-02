@@ -5,7 +5,6 @@ export default defineConfig({
   migrations: {
     path: './migrations',
   },
-  engine: 'classic',
   datasource: {
     url: process.env.DATABASE_URL!,
   },
