@@ -1,30 +1,38 @@
 syntax = "proto3";
 
-package wallet;
+package proto;
 
+// WalletService provides wallet lifecycle and balance management APIs.
 service WalletService {
+  // Creates a new wallet for the user.
   rpc CreateWallet (CreateWalletRequest) returns (WalletResponse);
+
+  // Retrieves an existing wallet by user ID.
   rpc GetWallet (GetWalletRequest) returns (WalletResponse);
+
+  // Adds funds to an existing wallet.
   rpc CreditWallet (UpdateBalanceRequest) returns (WalletResponse);
+
+  // Removes funds from an existing wallet.
   rpc DebitWallet (UpdateBalanceRequest) returns (WalletResponse);
 }
 
 message CreateWalletRequest {
-  string userId = 1;
+  string user_id = 1;
 }
 
 message GetWalletRequest {
-  string userId = 1;
+  string user_id = 1;
 }
 
 message UpdateBalanceRequest {
-  string userId = 1;
+  string user_id = 1;
   int32 amount = 2;
 }
 
 message WalletResponse {
   string id = 1;
-  string userId = 2;
+  string user_id = 2;
   int32 balance = 3;
-  string createdAt = 4;
+  string created_at = 4;
 }

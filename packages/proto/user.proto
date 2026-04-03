@@ -1,9 +1,13 @@
 syntax = "proto3";
 
-package user;
+package proto;
 
+// UserService provides user management operations.
 service UserService {
+  // CreateUser creates a new user with the provided email and name, and returns the created user details.
   rpc CreateUser (CreateUserRequest) returns (UserResponse);
+  
+  // GetUserById retrieves a user by their ID and returns the user details.
   rpc GetUserById (GetUserByIdRequest) returns (UserResponse);
 }
 
@@ -20,5 +24,5 @@ message UserResponse {
   string id = 1;
   string email = 2;
   string name = 3;
-  string createdAt = 4;
+  string created_at = 4;
 }
