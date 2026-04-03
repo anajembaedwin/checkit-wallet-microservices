@@ -5,6 +5,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 
 async function bootstrap() {
+  const walletServiceUrl = process.env.WALLET_SERVICE_URL ?? '0.0.0.0:50052';
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
@@ -12,7 +13,7 @@ async function bootstrap() {
       options: {
         package: 'wallet',
         protoPath: join(process.cwd(), '../../packages/proto/wallet.proto'),
-        url: '0.0.0.0:50052',
+        url: walletServiceUrl,
         loader: {
           keepCase: true,
         },

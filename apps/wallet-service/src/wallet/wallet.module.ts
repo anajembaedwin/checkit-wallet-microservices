@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WalletController } from './wallet.controller';
 import { WalletService } from './wallet.service';
 
+const userServiceUrl = process.env.USER_SERVICE_URL ?? 'localhost:50051';
+
 @Module({
   imports: [
     ClientsModule.register([
@@ -15,7 +17,7 @@ import { WalletService } from './wallet.service';
         options: {
           package: 'user',
           protoPath: join(process.cwd(), '../../packages/proto/user.proto'),
-          url: 'localhost:50051',
+          url: userServiceUrl,
           loader: {
             keepCase: true,
           },
