@@ -26,7 +26,10 @@ export class WalletService {
       this.logger.log({ userId, walletId: wallet.id }, 'Wallet created');
       return wallet;
     } catch {
-      this.logger.warn({ userId }, 'Wallet creation rejected because wallet exists');
+      this.logger.warn(
+        { userId },
+        'Wallet creation rejected because wallet exists',
+      );
       throw new ConflictException('Wallet already exists for this user');
     }
   }
@@ -82,7 +85,10 @@ export class WalletService {
         });
 
         if (!wallet) {
-          this.logger.warn({ userId }, 'Debit rejected because wallet was not found');
+          this.logger.warn(
+            { userId },
+            'Debit rejected because wallet was not found',
+          );
           throw new NotFoundException('Wallet not found');
         }
 
@@ -98,7 +104,10 @@ export class WalletService {
       });
 
       if (!updatedWallet) {
-        this.logger.warn({ userId }, 'Debit completed but wallet lookup failed');
+        this.logger.warn(
+          { userId },
+          'Debit completed but wallet lookup failed',
+        );
         throw new NotFoundException('Wallet not found');
       }
 

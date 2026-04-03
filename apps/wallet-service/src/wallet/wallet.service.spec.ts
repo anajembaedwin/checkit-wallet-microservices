@@ -1,11 +1,5 @@
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  jest,
-} from '@jest/globals';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserClient } from '../grpc/user.client';
@@ -32,6 +26,10 @@ describe('WalletService', () => {
   };
 
   beforeEach(() => {
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
     transactionClient = {
       wallet: {
         updateMany: jest.fn(),
@@ -188,8 +186,8 @@ describe('WalletService', () => {
     transactionClient.wallet.updateMany.mockResolvedValue({ count: 0 });
     transactionClient.wallet.findUnique.mockResolvedValue(null);
 
-    await expect(service.debitWallet('missing-user', 200)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      service.debitWallet('missing-user', 200),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });

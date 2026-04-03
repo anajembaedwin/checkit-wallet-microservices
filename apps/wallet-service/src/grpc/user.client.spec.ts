@@ -11,22 +11,28 @@ import type {
 describe('UserClient', () => {
   let client: UserClient;
   let grpcClient: ClientGrpc;
+  let getServiceMock: jest.MockedFunction<(name: string) => UserService>;
   let getUserByIdMock: jest.MockedFunction<
     (data: GetUserByIdRequest) => ReturnType<UserService['GetUserById']>
   >;
   let userService: UserService;
 
   beforeEach(() => {
-    getUserByIdMock = jest.fn<
-      (data: GetUserByIdRequest) => ReturnType<UserService['GetUserById']>
-    >();
+    getUserByIdMock =
+      jest.fn<
+        (data: GetUserByIdRequest) => ReturnType<UserService['GetUserById']>
+      >();
 
     userService = {
       GetUserById: getUserByIdMock,
     };
 
+    getServiceMock = jest
+      .fn<(name: string) => UserService>()
+      .mockReturnValue(userService);
+
     grpcClient = {
-      getService: jest.fn().mockReturnValue(userService),
+      getService: getServiceMock,
     } as unknown as ClientGrpc;
 
     client = new UserClient(grpcClient);
@@ -44,7 +50,7 @@ describe('UserClient', () => {
     getUserByIdMock.mockReturnValue(of(user));
 
     await expect(client.getUserById('user-1')).resolves.toEqual(user);
-    expect(grpcClient.getService).toHaveBeenCalledWith('UserService');
+    expect(getServiceMock).toHaveBeenCalledWith('UserService');
     expect(getUserByIdMock).toHaveBeenCalledWith({ id: 'user-1' });
   });
 });

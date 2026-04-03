@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import {
   ConflictException,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +23,10 @@ describe('UserService', () => {
   };
 
   beforeEach(() => {
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
     prisma = {
       user: {
         create: jest.fn(),

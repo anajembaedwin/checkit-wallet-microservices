@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, User as UserModel } from '@prisma/client';
 import { WalletClient } from '../grpc/wallet.client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,8 +19,8 @@ export class UserService {
     private readonly walletClient: WalletClient,
   ) {}
 
-  async createUser(data: CreateUserDto) {
-    let user;
+  async createUser(data: CreateUserDto): Promise<UserModel> {
+    let user: UserModel;
 
     try {
       user = await this.prisma.user.create({
@@ -32,11 +32,17 @@ export class UserService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        this.logger.warn({ email: data.email }, 'Duplicate user email rejected');
+        this.logger.warn(
+          { email: data.email },
+          'Duplicate user email rejected',
+        );
         throw new ConflictException('User with this email already exists');
       }
 
-      this.logger.error({ err: error, email: data.email }, 'Failed to create user');
+      this.logger.error(
+        { err: error, email: data.email },
+        'Failed to create user',
+      );
       throw new ConflictException('User with this email already exists');
     }
 
@@ -53,13 +59,15 @@ export class UserService {
       );
       throw error instanceof Error
         ? error
-        : new InternalServerErrorException('User created but wallet setup failed');
+        : new InternalServerErrorException(
+            'User created but wallet setup failed',
+          );
     }
 
     return user;
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<UserModel> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });

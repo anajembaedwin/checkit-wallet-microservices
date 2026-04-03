@@ -12,6 +12,7 @@ import type {
 describe('WalletClient', () => {
   let client: WalletClient;
   let grpcClient: ClientGrpc;
+  let getServiceMock: jest.MockedFunction<(name: string) => WalletService>;
   let createWalletMock: jest.MockedFunction<
     (data: CreateWalletRequest) => ReturnType<WalletService['CreateWallet']>
   >;
@@ -27,8 +28,12 @@ describe('WalletClient', () => {
       CreateWallet: createWalletMock,
     };
 
+    getServiceMock = jest
+      .fn<(name: string) => WalletService>()
+      .mockReturnValue(walletService);
+
     grpcClient = {
-      getService: jest.fn().mockReturnValue(walletService),
+      getService: getServiceMock,
     } as unknown as ClientGrpc;
 
     client = new WalletClient(grpcClient);
@@ -46,7 +51,7 @@ describe('WalletClient', () => {
     createWalletMock.mockReturnValue(of(wallet));
 
     await expect(client.createWallet('user-1')).resolves.toEqual(wallet);
-    expect(grpcClient.getService).toHaveBeenCalledWith('WalletService');
+    expect(getServiceMock).toHaveBeenCalledWith('WalletService');
     expect(createWalletMock).toHaveBeenCalledWith({
       user_id: 'user-1',
     });
