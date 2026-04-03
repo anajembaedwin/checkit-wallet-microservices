@@ -71,8 +71,8 @@ describe('Wallet Flow Integration', () => {
   beforeAll(async () => {
     await resetDatabase();
 
-    walletProcess = startService('apps\\wallet-service');
-    userProcess = startService('apps\\user-service');
+    walletProcess = startService('apps', 'wallet-service');
+    userProcess = startService('apps', 'user-service');
 
     userClient = createUserClient();
     walletClient = createWalletClient();
@@ -126,9 +126,9 @@ describe('Wallet Flow Integration', () => {
   );
 });
 
-function startService(relativePath: string): ChildProcess {
-  const serviceDir = join(rootDir, relativePath);
-  const child = spawn('node', ['dist/main.js'], {
+function startService(...relativePath: string[]): ChildProcess {
+  const serviceDir = join(rootDir, ...relativePath);
+  const child = spawn(process.execPath, ['dist/main.js'], {
     cwd: serviceDir,
     env: {
       ...process.env,
