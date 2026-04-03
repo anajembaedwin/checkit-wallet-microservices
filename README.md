@@ -158,6 +158,11 @@ Run integration flow:
 npm run test:integration
 ```
 
+## Additional Docs
+
+- gRPC command examples: `docs/grpcurl-examples.md`
+- OpenAPI-style docs layer: `docs/openapi.yaml`
+
 ## gRPC Contracts
 
 Proto files:

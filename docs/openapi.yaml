@@ -1,0 +1,193 @@
+openapi: 3.1.0
+info:
+  title: Checkit Wallet Microservices Docs Layer
+  version: 1.0.0
+  description: >
+    Documentation-only OpenAPI layer describing the gRPC request and response
+    payloads used by the user-service and wallet-service. This project remains
+    gRPC-first; these paths are provided for documentation and review clarity.
+
+servers:
+  - url: http://localhost
+    description: Documentation-only placeholder
+
+tags:
+  - name: User Service
+  - name: Wallet Service
+
+paths:
+  /user.UserService/CreateUser:
+    post:
+      tags: [User Service]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /user.UserService/GetUserById:
+    post:
+      tags: [User Service]
+      summary: Fetch a user by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetUserByIdRequest'
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /wallet.WalletService/CreateWallet:
+    post:
+      tags: [Wallet Service]
+      summary: Create a wallet for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWalletRequest'
+      responses:
+        '200':
+          description: Wallet created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+  /wallet.WalletService/GetWallet:
+    post:
+      tags: [Wallet Service]
+      summary: Fetch a wallet by user id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetWalletRequest'
+      responses:
+        '200':
+          description: Wallet found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+  /wallet.WalletService/CreditWallet:
+    post:
+      tags: [Wallet Service]
+      summary: Credit a wallet balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBalanceRequest'
+      responses:
+        '200':
+          description: Wallet credited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+  /wallet.WalletService/DebitWallet:
+    post:
+      tags: [Wallet Service]
+      summary: Debit a wallet balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBalanceRequest'
+      responses:
+        '200':
+          description: Wallet debited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      required: [email, name]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+    GetUserByIdRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          format: uuid
+    UserResponse:
+      type: object
+      required: [id, email, name, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CreateWalletRequest:
+      type: object
+      required: [user_id]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+    GetWalletRequest:
+      type: object
+      required: [user_id]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+    UpdateBalanceRequest:
+      type: object
+      required: [user_id, amount]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          minimum: 1
+    WalletResponse:
+      type: object
+      required: [id, user_id, balance, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        balance:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
