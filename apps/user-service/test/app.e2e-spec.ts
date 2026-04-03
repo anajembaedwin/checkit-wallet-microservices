@@ -10,6 +10,7 @@ import {
   it,
   jest,
 } from '@jest/globals';
+import { WalletClient } from '../src/grpc/wallet.client';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('UserService (e2e)', () => {
@@ -28,6 +29,10 @@ describe('UserService (e2e)', () => {
           findUnique: jest.fn(),
         },
       })
+      .overrideProvider(WalletClient)
+      .useValue({
+        createWallet: jest.fn(),
+      })
       .compile();
 
     app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
@@ -36,6 +41,9 @@ describe('UserService (e2e)', () => {
         package: 'user',
         protoPath: '../../packages/proto/user.proto',
         url: '0.0.0.0:50061',
+        loader: {
+          keepCase: true,
+        },
       },
     });
     await app.listen();

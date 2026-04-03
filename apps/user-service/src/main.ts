@@ -15,6 +15,9 @@ async function bootstrap() {
         package: 'user',
         protoPath,
         url: '0.0.0.0:50051',
+        loader: {
+          keepCase: true,
+        },
       },
     },
   );

@@ -42,6 +42,9 @@ describe('WalletService (e2e)', () => {
         package: 'wallet',
         protoPath: '../../packages/proto/wallet.proto',
         url: '0.0.0.0:50062',
+        loader: {
+          keepCase: true,
+        },
       },
     });
 

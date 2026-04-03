@@ -12,6 +12,9 @@ async function bootstrap() {
         package: 'wallet',
         protoPath: join(process.cwd(), '../../packages/proto/wallet.proto'),
         url: '0.0.0.0:50052',
+        loader: {
+          keepCase: true,
+        },
       },
     },
   );
