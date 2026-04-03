@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proto;
+package wallet;
 
 // WalletService provides wallet lifecycle and balance management APIs.
 service WalletService {
