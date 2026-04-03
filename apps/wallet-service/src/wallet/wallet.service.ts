@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +9,8 @@ import { UserClient } from '../grpc/user.client';
 
 @Injectable()
 export class WalletService {
+  private readonly logger = new Logger(WalletService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly userClient: UserClient,
@@ -17,10 +20,13 @@ export class WalletService {
     await this.userClient.getUserById(userId);
 
     try {
-      return await this.prisma.wallet.create({
+      const wallet = await this.prisma.wallet.create({
         data: { userId },
       });
+      this.logger.log({ userId, walletId: wallet.id }, 'Wallet created');
+      return wallet;
     } catch {
+      this.logger.warn({ userId }, 'Wallet creation rejected because wallet exists');
       throw new ConflictException('Wallet already exists for this user');
     }
   }
@@ -31,6 +37,7 @@ export class WalletService {
     });
 
     if (!wallet) {
+      this.logger.warn({ userId }, 'Wallet lookup failed');
       throw new NotFoundException('Wallet not found');
     }
 
@@ -75,9 +82,14 @@ export class WalletService {
         });
 
         if (!wallet) {
+          this.logger.warn({ userId }, 'Debit rejected because wallet was not found');
           throw new NotFoundException('Wallet not found');
         }
 
+        this.logger.warn(
+          { userId, amount, balance: wallet.balance },
+          'Debit rejected because balance is insufficient',
+        );
         throw new ConflictException('Insufficient wallet balance');
       }
 
@@ -86,9 +98,14 @@ export class WalletService {
       });
 
       if (!updatedWallet) {
+        this.logger.warn({ userId }, 'Debit completed but wallet lookup failed');
         throw new NotFoundException('Wallet not found');
       }
 
+      this.logger.log(
+        { userId, amount, balance: updatedWallet.balance },
+        'Wallet debited',
+      );
       return updatedWallet;
     });
   }
