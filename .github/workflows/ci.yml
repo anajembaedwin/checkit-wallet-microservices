@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 229494
+          POSTGRES_DB: wallet_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d wallet_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:229494@localhost:5432/wallet_db
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=packages/prisma/schema.prisma
+
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy --schema=packages/prisma/schema.prisma
+
+      - name: Type check user-service
+        run: npx tsc -p apps/user-service/tsconfig.json --noEmit
+
+      - name: Type check wallet-service
+        run: npx tsc -p apps/wallet-service/tsconfig.json --noEmit
+
+      - name: Run user-service tests
+        run: npm run test:user
+
+      - name: Run wallet-service tests
+        run: npm run test:wallet
+
+      - name: Run integration tests
+        run: npm run test:integration
