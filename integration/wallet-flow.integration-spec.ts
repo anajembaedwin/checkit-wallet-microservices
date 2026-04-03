@@ -57,8 +57,7 @@ type WalletServiceClient = grpc.Client & {
   ): void;
 };
 
-const rootDir =
-  'c:\\Users\\anaje\\Documents\\Github\\ContractWorkProjects\\checkit-wallet-microservices';
+const rootDir = join(__dirname, '..');
 const databaseUrl = 'postgresql://postgres:229494@localhost:5432/wallet_db';
 const userServiceAddress = 'localhost:50071';
 const walletServiceAddress = 'localhost:50072';
@@ -79,8 +78,8 @@ describe('Wallet Flow Integration', () => {
     walletClient = createWalletClient();
 
     await Promise.all([
-      waitForReady(userClient, 'localhost:50051'),
-      waitForReady(walletClient, 'localhost:50052'),
+      waitForReady(userClient, userServiceAddress),
+      waitForReady(walletClient, walletServiceAddress),
     ]);
   }, 30000);
 
@@ -88,8 +87,10 @@ describe('Wallet Flow Integration', () => {
     userClient?.close();
     walletClient?.close();
 
-    userProcess?.kill();
-    walletProcess?.kill();
+    await Promise.all([
+      stopService(userProcess),
+      stopService(walletProcess),
+    ]);
 
     await resetDatabase();
   }, 15000);
@@ -139,6 +140,25 @@ function startService(relativePath: string): ChildProcess {
   });
 
   return child;
+}
+
+function stopService(child?: ChildProcess): Promise<void> {
+  if (!child || child.exitCode !== null) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      child.kill('SIGKILL');
+    }, 5000);
+
+    child.once('exit', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+
+    child.kill('SIGTERM');
+  });
 }
 
 function createUserClient(): UserServiceClient {
