@@ -1,8 +1,10 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { WalletClient } from '../grpc/wallet.client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,7 +23,14 @@ export class UserService {
       user = await this.prisma.user.create({
         data,
       });
-    } catch {
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('User with this email already exists');
+      }
+
       throw new ConflictException('User with this email already exists');
     }
 
@@ -31,7 +40,9 @@ export class UserService {
       await this.prisma.user.delete({
         where: { id: user.id },
       });
-      throw error;
+      throw error instanceof Error
+        ? error
+        : new InternalServerErrorException('User created but wallet setup failed');
     }
 
     return user;

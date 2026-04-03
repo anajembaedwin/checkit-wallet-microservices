@@ -2,9 +2,11 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import { firstValueFrom } from 'rxjs';
 import {
   CreateWalletRequest,
@@ -26,7 +28,16 @@ export class WalletClient implements OnModuleInit {
     try {
       const request: CreateWalletRequest = { user_id: userId };
       return await firstValueFrom(this.walletService.CreateWallet(request));
-    } catch {
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === status.NOT_FOUND
+      ) {
+        throw new NotFoundException('User not found');
+      }
+
       throw new InternalServerErrorException(
         'User created but wallet setup failed',
       );

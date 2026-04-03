@@ -14,13 +14,13 @@ describe('WalletService', () => {
   let service: WalletService;
   let prisma: {
     wallet: {
-      create: jest.Mock;
-      findUnique: jest.Mock;
-      update: jest.Mock;
+      create: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
+      findUnique: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
+      update: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
     };
   };
   let userClient: {
-    getUserById: jest.Mock;
+    getUserById: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
   };
 
   beforeEach(() => {

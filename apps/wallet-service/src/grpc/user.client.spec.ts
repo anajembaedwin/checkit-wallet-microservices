@@ -2,16 +2,27 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { of } from 'rxjs';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { UserClient } from './user.client';
-import type { UserService } from '../types/user.interface';
+import type {
+  GetUserByIdRequest,
+  User,
+  UserService,
+} from '../types/user.interface';
 
 describe('UserClient', () => {
   let client: UserClient;
   let grpcClient: ClientGrpc;
+  let getUserByIdMock: jest.MockedFunction<
+    (data: GetUserByIdRequest) => ReturnType<UserService['GetUserById']>
+  >;
   let userService: UserService;
 
   beforeEach(() => {
+    getUserByIdMock = jest.fn<
+      (data: GetUserByIdRequest) => ReturnType<UserService['GetUserById']>
+    >();
+
     userService = {
-      GetUserById: jest.fn(),
+      GetUserById: getUserByIdMock,
     };
 
     grpcClient = {
@@ -23,17 +34,17 @@ describe('UserClient', () => {
   });
 
   it('resolves the UserService from the gRPC client', async () => {
-    const user = {
+    const user: User = {
       id: 'user-1',
       email: 'user@example.com',
       name: 'User One',
       created_at: new Date().toISOString(),
     };
 
-    (userService.GetUserById as jest.Mock).mockReturnValue(of(user));
+    getUserByIdMock.mockReturnValue(of(user));
 
     await expect(client.getUserById('user-1')).resolves.toEqual(user);
     expect(grpcClient.getService).toHaveBeenCalledWith('UserService');
-    expect(userService.GetUserById).toHaveBeenCalledWith({ id: 'user-1' });
+    expect(getUserByIdMock).toHaveBeenCalledWith({ id: 'user-1' });
   });
 });

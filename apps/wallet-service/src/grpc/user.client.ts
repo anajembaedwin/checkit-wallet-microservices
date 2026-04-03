@@ -1,5 +1,12 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import { firstValueFrom } from 'rxjs';
 import { GetUserByIdRequest, User, UserService } from '../types/user.interface';
 
@@ -14,7 +21,20 @@ export class UserClient implements OnModuleInit {
   }
 
   async getUserById(id: string): Promise<User> {
-    const request: GetUserByIdRequest = { id };
-    return firstValueFrom(this.userService.GetUserById(request));
+    try {
+      const request: GetUserByIdRequest = { id };
+      return await firstValueFrom(this.userService.GetUserById(request));
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === status.NOT_FOUND
+      ) {
+        throw new NotFoundException('User not found');
+      }
+
+      throw new InternalServerErrorException('Unable to verify user');
+    }
   }
 }
