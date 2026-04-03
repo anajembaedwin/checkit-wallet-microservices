@@ -21,6 +21,7 @@ Backend engineer assessment solution built with NestJS, gRPC, Prisma, PostgreSQL
 - [Services](#services)
 - [Database Design](#database-design)
 - [API Contracts](#api-contracts)
+- [gRPC vs REST](#grpc-vs-rest)
 - [Swagger and API Docs](#swagger-and-api-docs)
 - [Environment Variables](#environment-variables)
 - [Getting Started](#getting-started)
@@ -203,6 +204,29 @@ The contracts use snake_case payload fields, including:
 
 - `created_at`
 - `user_id`
+
+## gRPC vs REST
+
+This project uses gRPC as its real runtime API, not REST.
+
+Short comparison:
+
+- REST usually sends JSON over HTTP and is centered around resource URLs such as `/users` or `/wallets`
+- gRPC uses `.proto` contracts and method calls such as `CreateUser` or `GetWallet`
+- REST is easier to inspect in a browser and is common for public-facing APIs
+- gRPC is better suited to internal service-to-service communication because it is strongly typed, contract-first, and more compact on the wire
+
+Why gRPC was used here:
+
+- the assessment is microservice-focused
+- `wallet-service` needs to call `user-service` directly
+- proto contracts make the interaction explicit and strongly typed
+- the services benefit from a compact, structured transport for internal calls
+
+Important note:
+
+- the real API in this repository is gRPC
+- the OpenAPI file in `docs/openapi.yaml` is documentation-only and exists to help reviewers understand the request and response payloads
 
 ## Swagger and API Docs
 
