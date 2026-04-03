@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { join } from 'path';
         },
       },
     ]),
+    WalletModule,
   ],
 })
 export class AppModule {}

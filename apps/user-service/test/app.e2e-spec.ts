@@ -1,29 +1,53 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { INestMicroservice } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+import { PrismaService } from '../src/prisma/prisma.service';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+describe('UserService (e2e)', () => {
+  let app: INestMicroservice;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({
+        $connect: jest.fn(),
+        $disconnect: jest.fn(),
+        user: {
+          create: jest.fn(),
+          findUnique: jest.fn(),
+        },
+      })
+      .compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
+      transport: Transport.GRPC,
+      options: {
+        package: 'user',
+        protoPath: '../../packages/proto/user.proto',
+        url: '0.0.0.0:50061',
+      },
+    });
+    await app.listen();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('boots the gRPC microservice', () => {
+    expect(app).toBeDefined();
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 });
