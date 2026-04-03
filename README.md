@@ -250,6 +250,7 @@ Important note:
 If you want executable request examples, use:
 
 - [docs/grpcurl-examples.md](docs/grpcurl-examples.md)
+- [docs/Checkit-Wallet-Microservices.postman_collection.json](docs/Checkit-Wallet-Microservices.postman_collection.json)
 
 ## Environment Variables
 
@@ -398,9 +399,14 @@ grpcurl -plaintext \
 
 More examples are available in [docs/grpcurl-examples.md](docs/grpcurl-examples.md).
 
+Postman collection:
+
+- [docs/Checkit-Wallet-Microservices.postman_collection.json](docs/Checkit-Wallet-Microservices.postman_collection.json)
+
 ## Additional Documentation
 
 - [docs/grpcurl-examples.md](docs/grpcurl-examples.md)
+- [docs/Checkit-Wallet-Microservices.postman_collection.json](docs/Checkit-Wallet-Microservices.postman_collection.json)
 - [docs/openapi.yaml](docs/openapi.yaml)
 - [docs/database-design.md](docs/database-design.md)
 

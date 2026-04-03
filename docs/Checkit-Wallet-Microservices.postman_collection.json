@@ -1,0 +1,140 @@
+{
+  "info": {
+    "_postman_id": "9de44502-7d04-4fc8-aa6c-b6fccb0d0f30",
+    "name": "Checkit Wallet Microservices",
+    "description": "Documentation-oriented Postman collection for the gRPC methods exposed by user-service and wallet-service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Service",
+      "item": [
+        {
+          "name": "CreateUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"name\": \"Jane Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{user_service_grpc_method_base}}/user.UserService/CreateUser",
+              "host": ["{{user_service_grpc_method_base}}"],
+              "path": ["user.UserService", "CreateUser"]
+            },
+            "description": "Documentation placeholder for the gRPC CreateUser method. Use the payload with grpcurl or Postman's gRPC request support."
+          }
+        },
+        {
+          "name": "GetUserById",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"USER_ID_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{user_service_grpc_method_base}}/user.UserService/GetUserById",
+              "host": ["{{user_service_grpc_method_base}}"],
+              "path": ["user.UserService", "GetUserById"]
+            },
+            "description": "Documentation placeholder for the gRPC GetUserById method."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet Service",
+      "item": [
+        {
+          "name": "GetWallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER_ID_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{wallet_service_grpc_method_base}}/wallet.WalletService/GetWallet",
+              "host": ["{{wallet_service_grpc_method_base}}"],
+              "path": ["wallet.WalletService", "GetWallet"]
+            },
+            "description": "Documentation placeholder for the gRPC GetWallet method."
+          }
+        },
+        {
+          "name": "CreditWallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER_ID_HERE\",\n  \"amount\": 500\n}"
+            },
+            "url": {
+              "raw": "{{wallet_service_grpc_method_base}}/wallet.WalletService/CreditWallet",
+              "host": ["{{wallet_service_grpc_method_base}}"],
+              "path": ["wallet.WalletService", "CreditWallet"]
+            },
+            "description": "Documentation placeholder for the gRPC CreditWallet method."
+          }
+        },
+        {
+          "name": "DebitWallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER_ID_HERE\",\n  \"amount\": 200\n}"
+            },
+            "url": {
+              "raw": "{{wallet_service_grpc_method_base}}/wallet.WalletService/DebitWallet",
+              "host": ["{{wallet_service_grpc_method_base}}"],
+              "path": ["wallet.WalletService", "DebitWallet"]
+            },
+            "description": "Documentation placeholder for the gRPC DebitWallet method."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "user_service_grpc_method_base",
+      "value": "grpc://localhost:50051"
+    },
+    {
+      "key": "wallet_service_grpc_method_base",
+      "value": "grpc://localhost:50052"
+    }
+  ]
+}
