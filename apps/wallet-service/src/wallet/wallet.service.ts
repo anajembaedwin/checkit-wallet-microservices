@@ -39,29 +39,57 @@ export class WalletService {
 
   async creditWallet(userId: string, amount: number) {
     this.assertPositiveAmount(amount);
-    const wallet = await this.getWallet(userId);
+    await this.getWallet(userId);
 
     return this.prisma.wallet.update({
-      where: { id: wallet.id },
+      where: { userId },
       data: {
-        balance: wallet.balance + amount,
+        balance: {
+          increment: amount,
+        },
       },
     });
   }
 
   async debitWallet(userId: string, amount: number) {
     this.assertPositiveAmount(amount);
-    const wallet = await this.getWallet(userId);
 
-    if (wallet.balance < amount) {
-      throw new ConflictException('Insufficient wallet balance');
-    }
+    return this.prisma.$transaction(async (tx) => {
+      const result = await tx.wallet.updateMany({
+        where: {
+          userId,
+          balance: {
+            gte: amount,
+          },
+        },
+        data: {
+          balance: {
+            decrement: amount,
+          },
+        },
+      });
 
-    return this.prisma.wallet.update({
-      where: { id: wallet.id },
-      data: {
-        balance: wallet.balance - amount,
-      },
+      if (result.count === 0) {
+        const wallet = await tx.wallet.findUnique({
+          where: { userId },
+        });
+
+        if (!wallet) {
+          throw new NotFoundException('Wallet not found');
+        }
+
+        throw new ConflictException('Insufficient wallet balance');
+      }
+
+      const updatedWallet = await tx.wallet.findUnique({
+        where: { userId },
+      });
+
+      if (!updatedWallet) {
+        throw new NotFoundException('Wallet not found');
+      }
+
+      return updatedWallet;
     });
   }
 

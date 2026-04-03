@@ -12,19 +12,38 @@ import { UserClient } from '../grpc/user.client';
 
 describe('WalletService', () => {
   let service: WalletService;
+  type TransactionClientMock = {
+    wallet: {
+      updateMany: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
+      findUnique: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
+    };
+  };
   let prisma: {
+    $transaction: any;
     wallet: {
       create: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
       findUnique: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
       update: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
     };
   };
+  let transactionClient: TransactionClientMock;
   let userClient: {
     getUserById: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
   };
 
   beforeEach(() => {
+    transactionClient = {
+      wallet: {
+        updateMany: jest.fn(),
+        findUnique: jest.fn(),
+      },
+    };
+
     prisma = {
+      $transaction: jest.fn(
+        async (fn: (tx: TransactionClientMock) => Promise<unknown>) =>
+          fn(transactionClient),
+      ),
       wallet: {
         create: jest.fn(),
         findUnique: jest.fn(),
@@ -105,8 +124,8 @@ describe('WalletService', () => {
       updatedWallet,
     );
     expect(prisma.wallet.update).toHaveBeenCalledWith({
-      where: { id: 'wallet-1' },
-      data: { balance: 1500 },
+      where: { userId: 'user-1' },
+      data: { balance: { increment: 500 } },
     });
   });
 
@@ -117,23 +136,31 @@ describe('WalletService', () => {
   });
 
   it('debits an existing wallet', async () => {
-    const wallet = {
+    const updatedWallet = {
       id: 'wallet-1',
       userId: 'user-1',
-      balance: 1000,
+      balance: 700,
       createdAt: new Date(),
     };
-    const updatedWallet = { ...wallet, balance: 700 };
 
-    prisma.wallet.findUnique.mockResolvedValue(wallet);
-    prisma.wallet.update.mockResolvedValue(updatedWallet);
+    transactionClient.wallet.updateMany.mockResolvedValue({ count: 1 });
+    transactionClient.wallet.findUnique.mockResolvedValue(updatedWallet);
 
     await expect(service.debitWallet('user-1', 300)).resolves.toEqual(
       updatedWallet,
     );
-    expect(prisma.wallet.update).toHaveBeenCalledWith({
-      where: { id: 'wallet-1' },
-      data: { balance: 700 },
+    expect(prisma.$transaction).toHaveBeenCalled();
+    expect(transactionClient.wallet.updateMany).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        balance: { gte: 300 },
+      },
+      data: {
+        balance: { decrement: 300 },
+      },
+    });
+    expect(transactionClient.wallet.findUnique).toHaveBeenCalledWith({
+      where: { userId: 'user-1' },
     });
   });
 
@@ -144,7 +171,8 @@ describe('WalletService', () => {
   });
 
   it('rejects debits that exceed balance', async () => {
-    prisma.wallet.findUnique.mockResolvedValue({
+    transactionClient.wallet.updateMany.mockResolvedValue({ count: 0 });
+    transactionClient.wallet.findUnique.mockResolvedValue({
       id: 'wallet-1',
       userId: 'user-1',
       balance: 100,
@@ -153,6 +181,15 @@ describe('WalletService', () => {
 
     await expect(service.debitWallet('user-1', 200)).rejects.toBeInstanceOf(
       ConflictException,
+    );
+  });
+
+  it('throws when a debit is attempted against a missing wallet', async () => {
+    transactionClient.wallet.updateMany.mockResolvedValue({ count: 0 });
+    transactionClient.wallet.findUnique.mockResolvedValue(null);
+
+    await expect(service.debitWallet('missing-user', 200)).rejects.toBeInstanceOf(
+      NotFoundException,
     );
   });
 });
