@@ -257,7 +257,7 @@ If you want executable request examples, use:
 Create a root `.env` file if it does not already exist:
 
 ```env
-DATABASE_URL="postgresql://postgres:229494@localhost:5432/wallet_db"
+DATABASE_URL="postgresql://postgres:<your-password>@localhost:5432/wallet_db"
 ```
 
 Optional runtime overrides:
